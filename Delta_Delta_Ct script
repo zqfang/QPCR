@@ -2,21 +2,36 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# read data intp a dataFrame
+# file path
 path = 'D:/Python/python.csv'
+
+# read data into a dataFrame
 data = pd.read_csv(path)
 print(data.head(10))
 
 
-# calculate Ct mean values for each replicates, then assign this new object to a new dataFrame.
-data2 = data.groupby(['SampleName','DetectorName']).mean()
+# calculate Ct mean values for each replicates
+
+# data2 = data.groupby(['SampleName','DetectorName']).mean()
+
+# instead of using groupby, you can remove duplicates using drop_duplicates
+data0 = data.drop_duplicates(['SampleName','DetectorName']) 
+data2 = data0.set_index(['SampleName','DetectorName'])
+
+
 print(data2.head(10))
 
 
-#Assign your sample name and detector name
-sample = ['NT ES','NT MESEN','NT NE2','NT NE4','NT NE6','NT TROPH','RNAi ES','RNAi MESEN','RNAi NE2','RNAi NE4','RNAi NE6','RNAi TROPH'] 
+#Assign your sample name and detector name like this
+#sample = ['NT ES','NT MESEN','NT NE2','NT NE4','NT NE6','NT TROPH','RNAi ES','RNAi MESEN','RNAi NE2','RNAi NE4','RNAi NE6','RNAi TROPH'] 
 
-#calculate Delta_Ct value, for better interpration,  I use GAPDH as a internal control.
+# or using set() to build an unordered collection of unique name of sample. However, set object is not itreatable, so we can convert set to list
+
+sample0 = set(data['SampleName'])
+sample = list(sample0)
+
+  
+#calculate Delta_Ct value, for better interpration,  I use 'GAPDH' as a internal control.
 
 DelCt=pd.DataFrame()
 for i in range(len(sample)):
@@ -30,7 +45,7 @@ DelCt.index.name = 'DeltaCt'
 DelCt2 = DelCt.reset_index()
 DelCt3 = DelCt2.set_index(['Sample','DeltaCt'])
 
-DelCt3.to_csv("Delta_Ct.csv")
+DelCt3.to_csv('Delta_Ct.csv')
 print(DelCt3.head(10))
 
 #calculate Delta_Delta_Ct, for demo, use 'NT ES' as our control group.
@@ -48,10 +63,5 @@ for i in range(len(sample)):
 DDelCt.index.name = 'DDeltaCt'
 DDelCt2 = DDelCt.reset_index()
 DDelCt3 = DDelCt2.set_index(['Sample','DDeltaCt'])
-DDelCt3.to_csv("Delta_Delta_Ct.csv")
-print(DDelCt3.head(20))
-
-    
-
-
-
+DDelCt3.to_csv('Delta_Delta_Ct.csv')
+print(DDelCt3.head(10))
