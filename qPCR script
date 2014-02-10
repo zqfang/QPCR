@@ -1,0 +1,57 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# read data intp a dataFrame
+path = 'D:/Python/python.csv'
+data = pd.read_csv(path)
+print(data.head(10))
+
+
+# calculate Ct mean values for each replicates, then assign this new object to a new dataFrame.
+data2 = data.groupby(['SampleName','DetectorName']).mean()
+print(data2.head(10))
+
+
+#Assign your sample name and detector name
+sample = ['NT ES','NT MESEN','NT NE2','NT NE4','NT NE6','NT TROPH','RNAi ES','RNAi MESEN','RNAi NE2','RNAi NE4','RNAi NE6','RNAi TROPH'] 
+
+#calculate Delta_Ct value, for better interpration,  I use GAPDH as a internal control.
+
+DelCt=pd.DataFrame()
+for i in range(len(sample)):
+    deltaCt =data2.loc[sample[i]]- data2.loc[(sample[i],'GAPDH')]
+    deltaCt['Sample'] = sample[i]
+    DelCt = DelCt.append(deltaCt)
+    print(deltaCt)   
+
+#reshape your dataFrame,export to a csv file
+DelCt.index.name = 'DeltaCt'
+DelCt2 = DelCt.reset_index()
+DelCt3 = DelCt2.set_index(['Sample','DeltaCt'])
+
+DelCt3.to_csv("Delta_Ct.csv")
+print(DelCt3.head(10))
+
+#calculate Delta_Delta_Ct, for demo, use 'NT ES' as our control group.
+DDelCt =pd.DataFrame()
+
+for i in range(len(sample)):
+    DDeltaCt = DelCt3.loc[sample[i]]-DelCt3.loc['NT ES']
+    DDeltaCt['Sample'] = sample[i]
+    DDelCt = DDelCt.append(DDeltaCt)
+    print(DDeltaCt)
+
+
+
+#reshape your dataFrame,export to a csv file
+DDelCt.index.name = 'DDeltaCt'
+DDelCt2 = DDelCt.reset_index()
+DDelCt3 = DDelCt2.set_index(['Sample','DDeltaCt'])
+DDelCt3.to_csv("Delta_Delta_Ct.csv")
+print(DDelCt3.head(20))
+
+    
+
+
+
