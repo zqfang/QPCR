@@ -9,6 +9,6 @@ qPCR
     
     For using this scirpt, sample name and detector name(genes that you want to detect) should be the same with your data sets. You can modify by yourself as desired.
     
-    You need to modify file path and file format mannually if your have different file source, like txt et. al.
+    You need to specify the file path and file format mannually if your have different file source, like txt et. al.
     
-    In addition, your should modify internal control name and expriment control name for your own data sets.
+    In addition, your should specify internal control name and expriment control name for your own data sets.
