@@ -1,3 +1,15 @@
+#    FileName:FZQ
+#    Desc: Calculating Delta_Ct and Delta_Delta_Ct values from 
+#    Quantitative real time polymerase chain reaction(qRT-PCR)
+#    Author:FZQ
+#    Email:fangzhuoqing@sibs.ac.cn
+#    HomePage:
+#    Version: 1.0
+#    LastChange:
+#    History:2014/02/11
+
+
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
