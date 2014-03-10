@@ -4,9 +4,9 @@
 #    Author:Fang Zhuoqing, Wang Sishuo
 #    Email:fangzhuoqing@sibs.ac.cn
 #    HomePage:
-#    Version: 1.2
+#    Version: 1.2.1
 #    LastChange:
-#    History:2014/02/11
+#    History:2014/03/10
 
 
 
@@ -107,6 +107,7 @@ print "experiment_control is set to " + experiment_control;
 ####################################################################
 # read data into a dataFrame
 data = pd.read_csv(input_file)
+print("The first 10 row in your original data is: ")
 print(data.head(10))
 
 
@@ -118,7 +119,7 @@ print(data.head(10))
 data0 = data.drop_duplicates(['Sample Name','Detector Name']) 
 data2 = data0.set_index(['Sample Name','Detector Name'])
 
-
+print("The first 10 row in pre-processed(duplicates and NaN are filtered out) data is: ")
 print(data2.head(10))
 
 
@@ -130,6 +131,8 @@ print(data2.head(10))
 sample0 = set(data['Sample Name'])
 sample = list(sample0)
 
+print("Your Samples are: ")
+print(sample)
   
 #calculate Delta_Ct value, for better interpration,  I use 'GAPDH' as a internal control as demo.
 
@@ -146,10 +149,11 @@ DelCt2 = DelCt.reset_index()
 DelCt3 = DelCt2.set_index(['Sample','Detector'])
 
 # If you want to rename column names, using this code 
-#DelCt3.rename(columns={'Ct': 'DeltaCt', 'CtMean': 'DeltaCtMean'}, inplace=True)
+#DelCt3.rename(columns={'Ct': 'Delta Ct', 'Ct Mean': 'Delta CtMean'}, inplace=True)
 DelCt3.rename(columns={'Ct Mean': 'DeltaCt'}, inplace=True)
 
 DelCt3.to_csv('Delta_Ct.csv')
+print("The first 10 row in your Delta_Ct value is: ")
 print(DelCt3.head(10))
 
 #calculate Delta_Delta_Ct, for demo, I use 'NT ES' as our experiment control group.
@@ -168,23 +172,39 @@ DDelCt.index.name = 'Detector'
 DDelCt2 = DDelCt.reset_index()
 DDelCt3 = DDelCt2.set_index(['Sample','Detector'])
 DDelCt3.rename(columns={'DeltaCt': 'DDeltaCt'}, inplace=True)
-DDelCt4 = DDelCt3.dropna()
+DDelCt4=DDelCt3.dropna(how='all')
 DDelCt4.to_csv('Delta_Delta_Ct.csv')
-print(DDelCt4.head(10))
+
+print("The first 10 row in your Delta_Delta_Ct values is: ")
+print(DDelCt3.head(10))
 
 # calculate FoldChange, and export to a csv file
 
 foldChange0 = pow(2,-DDelCt4)
 foldChange0.rename(columns={'DDeltaCt':'FoldChange'},inplace=True)
-foldChange = foldChange0.drop(experiment_control,level=0)
-foldChange1 = foldChange.drop(internal_control,level=1)
+# foldChange = foldChange0.drop(experiment_control,level=0)
+foldChange1 = foldChange0.drop(internal_control,level=1)
 foldChange1.to_csv('FoldChange.csv')
+
+print("The first 10 row in your FoldChange values is: ")
 print(foldChange1.head(10))
 
     
+#reshape your final results
+#extract columns you needed
 
+d1=data2[['Ct Mean']]
+d2=DelCt3[['DeltaCt']]
+d3=DDelCt4[['DDeltaCt']]
+d4=foldChange0[['FoldChange']]
 
-    
+#merge data,export to a csv file.
 
+m1=pd.merge(d1,d2,left_index=True,right_index=True)
+m2=pd.merge(m1,d3,left_index=True,right_index=True)
+final_report=pd.merge(m2,d4,left_index=True,right_index=True)
+final_report.index.names=['Sample','Detector']
+final_report.to_csv('FinalResults.csv')
 
-
+print('The first 10 rows in your Final results: ')
+print(final_report.head(10))
