@@ -18,4 +18,4 @@ data = data0.drop(data0.tail(5).index) # remove last 5 row
 dat = data[columns] # extract data wich we are interest
 
 # write to a new excel file
-dat.to_excel(output_file_name,'Results',index_col= None, na_values = ['NA']
+dat.to_excel(output_file_name,'Results',index_col= None, na_values = ['NA'])
