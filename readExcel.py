@@ -32,10 +32,6 @@ print "ReferenceControl =", args.rc
 print "ExperimentControl=", args.ec
 print "outFileName      =", args.out
 
-import numpy as np
-import pandas as pd
-
-
 columns = ['Sample Name','Target Name','CT','Ct Mean','Ct SD']
 
 # Read data into pandas DataFrame Object
