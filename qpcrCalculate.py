@@ -25,7 +25,6 @@ parser.add_argument("--version",action="version",version="%(prog)s 1.0")
 args = parser.parse_args()
 
 print("InputFile        =", args.file)
-print("Machine          =", args.machine)
 print("SheetName        =", args.sheet)
 print("headerRow        =", args.head)
 print("tailRow          =", args.tail)
@@ -46,30 +45,40 @@ import pandas as pd
 
 # checking flies and parameters.
 if not os.path.exists(args.file) :
-  print("File doesn't exist, please check your file path!")
+  print("InputFile doesn't exist, please check your file path!")
   sys.exit(1)
 # read data into a dataFrame
 data = pd.read_csv(input_file)
 print("The first 5 row in your original data is: ")
 print(data.head(5))
 
+# rename column name
+if 'Target Name' not in data:
+    if 'Target Name' in data:
+        data.rename(columns={'Ct': 'CT','Detector Name':'Target Name'}, inplace=True)
+    else:
+        print("column name error! Plesase rename your column name!")
+        sys.exit(1)
+
 
 # calculate Ct mean values for each replicates
 
-# data2 = data.groupby(['SampleName','DetectorName']).mean()
+data2 = data.groupby(['Sample Name','Target Name']).mean()
 
 # instead of using groupby, you can remove duplicates using drop_duplicates
-data0 = data.drop_duplicates(['Sample Name','Detector Name']) 
-data2 = data0.set_index(['Sample Name','Detector Name'])
+# data0 = data.drop_duplicates(['Sample Name','Target Name']) 
+# data2 = data0.set_index(['Sample Name','Target Name'])
 
 print("The first 5 row in pre-processed(duplicates and NaN are filtered out) data is: ")
 print(data2.head(5))
 
 
-#Assign your sample name and detector name like this
-#sample = ['NT ES','NT MESEN','NT NE2','NT NE4','NT NE6','NT TROPH','RNAi ES','RNAi MESEN','RNAi NE2','RNAi NE4','RNAi NE6','RNAi TROPH'] 
+#Assign your sample name and target name like this
+#sample = ['NT ES','NT MESEN','NT NE2','NT NE4','NT NE6','NT TROPH',\
+#           'RNAi ES','RNAi MESEN','RNAi NE2','RNAi NE4','RNAi NE6','RNAi TROPH'] 
 
-# or using set() to build an unordered collection of unique name of sample. However, set object is not itreatable, so we can convert set to list
+# or using set() to build an unordered collection of unique name of sample. 
+# However, set object is not itreatable, so we can convert set to list
 
 sample0 = set(data['Sample Name'])
 sample = list(sample0)
@@ -134,7 +143,8 @@ print(foldChange1.head(5))
 
     
 #reshape your final results
-#extract columns you needed
+#extract columns you needed,remain as DataFrame object using double bracket.
+#for merging columns esayliy
 
 d1=data2[['Ct Mean']]
 d2=DelCt3[['DeltaCt']]
@@ -151,3 +161,5 @@ final_report.to_csv('FinalResults.csv')
 
 print('The first 5 rows in your Final results: ')
 print(final_report.head(5))
+
+print("Done")
