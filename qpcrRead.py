@@ -2,13 +2,16 @@
 This script used for read excel output from ABI ViiA7 qPCR machine.
 Extract Data for further computing
 '''
+from __future__ import print_function
 import argparse
 
 
 # parse command line args
-parser = argparse.ArgumentParser(description="Extract qpcr data from ABi ViiA 7 machine")
+parser = argparse.ArgumentParser(description="Extract qpcr data from ABi machine")
 
-parser.add_argument("-f","--excelFile", action="store", dest="file",help="the excel file you want to analysis ")
+parser.add_argument("-m","--machine",choices=['viia7','7900'],default="viia7",dest="machine",\
+                     help="Choice platform which data was generated from.")
+parser.add_argument("-f","--file", action="store", dest="file",help="the excel file you want to analysis ")
 parser.add_argument("-s","--sheetName", action="store",default="Results", dest="sheet", \
                      help="the sheet name of your excel file you want to analysis ")
 parser.add_argument("--header", action="store",type=int,dest="head", default=35,\
@@ -24,13 +27,14 @@ parser.add_argument("-o","--outFileNamePrefix",action="store",default="foo",dest
 parser.add_argument("--version",action="version",version="%(prog)s 1.0")
 args = parser.parse_args()
 
-print "ExeclFile        =", args.file
-print "SheetName        =", args.sheet
-print "headerRow        =", args.head
-print "tailRow          =", args.tail
-print "ReferenceControl =", args.rc
-print "ExperimentControl=", args.ec
-print "outFileName      =", args.out
+print("ExeclFile        =", args.file)
+print("Machine          =", args.machine)
+print("SheetName        =", args.sheet)
+print("headerRow        =", args.head)
+print("tailRow          =", args.tail)
+print("ReferenceControl =", args.rc)
+print("ExperimentControl=", args.ec)
+print("outFileName      =", args.out)
 
 columns = ['Sample Name','Target Name','CT','Ct Mean','Ct SD']
 
