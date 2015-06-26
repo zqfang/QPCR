@@ -5,7 +5,7 @@
 
 
      
-This python script aims at calculating the **Delta_Ct, Delta_Delta_Ct and FoldChange** value which
+These python programs aim at calculating the **Delta_Ct, Delta_Delta_Ct and FoldChange** value which
 produced by Quantitative real time polymerase chain reaction.
     
 **Pandas**, a python data analysis tool, is required for using this script.
