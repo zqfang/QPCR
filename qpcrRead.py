@@ -10,7 +10,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Extract qpcr data from ABi machine")
 
 parser.add_argument("-m","--machine",choices=['viia7','7900'],default="viia7",dest="machine",\
-                     help="Choice platform which data was generated from.")
+                     help="Choose platform which data was generated from.")
 parser.add_argument("-f","--file", action="store", dest="file",help="the excel file you want to analysis ")
 parser.add_argument("-s","--sheetName", action="store",default="Results", dest="sheet", \
                      help="the sheet name of your excel file you want to analysis ")
