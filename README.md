@@ -22,13 +22,14 @@ For ABi ViiA 7 users, you can use qpcrRead.py to extract data computing results 
 
 Python2.7 or Python3 users
 
-####Before use this module, see help
+#####Before use this module, see help
 python qpcrRead.py -h 
+python Delta_Delta_Ct.py -h
 
-####Extract Data from Original Data output
+#####Extract Data from Original Data output
 e.g. python qpcrRead.py -f foo.xls --header 35 --tail 5  -o 20150625_NPC_Knockdown
 
-####Calculate Detal_Ct, Delta_Delta_Ct, Fold_Change and generate output file
+#####Calculate Detal_Ct, Delta_Delta_Ct, Fold_Change and generate output file
 e.g. python Delta_Delta_Ct.py -f foo.csv -r GAPDH -c hESC -o 20150625_NPC_Knockdown
 
 ###Generate Plots: line, bar plot
