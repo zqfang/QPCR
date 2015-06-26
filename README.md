@@ -1,4 +1,6 @@
-qPCR
+# qPCR 
+
+### Process You qRT-PCR Results Results Easy  
 ====
 
 
@@ -17,7 +19,13 @@ column names must be 'Sample Name','Detector Name','Ct','Ct Mean'. But 'Ct StdEV
 
 For ABi ViiA 7 users, you can use readExecl.py to extract data computing results directly.
 
-##USEAGE
+##Useage
 
 e.g. python readExecl.py -f foo.xls --header 35 --tail 5 -r GAPDH -c hESC -o 20150625
+
+##To Do
+
+1. process data automatically without pre-filter outliner mannully.
+2. Generate Plots using Matplotlib automatically 
+3. Generate Matplotlib Plotting Scripts for customized modification
 
