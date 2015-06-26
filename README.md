@@ -25,7 +25,7 @@ Python2.7 or Python3 users
 #####Before use this module, see help
 python qpcrRead.py -h 
 
-python Delta_Delta_Ct.py -h
+python qpcrCalculate.py -h
 
 #####Extract Data from Original Data output
 e.g. python qpcrRead.py -f foo.xls --header 35 --tail 5  -o 20150625_NPC_Knockdown
