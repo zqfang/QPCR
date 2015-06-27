@@ -1,4 +1,3 @@
-[zqfang@n6166 argparse]$ cat qpcrCalculate.py 
 '''
 This script used for calculateing DeltaCt, DeltaDeltaCt, FoldChange for QPCR 
 '''
@@ -6,7 +5,7 @@ from __future__ import print_function
 import argparse
 
 
-# parse command line args
+########################### parse command line args############################################
 parser = argparse.ArgumentParser(description="Calculateing DeltaCt, DeltaDeltaCt, FoldChange for qpcr")
 
 parser.add_argument("-f","--file", action="store", dest="file",help="the file you want to analysis. ")
@@ -139,7 +138,7 @@ foldChange = foldChange0.drop(exp_ctrl,level=0)
 foldChange1 = foldChange0.drop(ref_ctrl,level=1)
 #foldChange1.to_csv('FoldChange.csv')
 
-print("The first 10 row in your FoldChange values is: ")
+print("The first 5 row in your FoldChange values is: ")
 print(foldChange1['FoldChange'].head(5))
 
     
