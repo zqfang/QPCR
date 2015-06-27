@@ -33,25 +33,25 @@ python qpcrCalculate.py -h
 ####Parameters
 
 optional arguments:
-  -h, --help &nbsp;                         show this help message and exit
+  -h, --help 
   
-  -f FILE, --file FILE &nbsp;          the file you want to analysis.
+  -f FILE, --file FILE 
   
-  -s SHEET, --sheetName SHEET &nbsp;         the sheet name of your excel file you want to analysis
+  -s SHEET, --sheetName SHEET
   
-  --header HEAD               &nbsp;         header row you want to start with
+  --header HEAD 
   
-  --tail TAIL                  &nbsp;       the tail rows of your excel file you want to drop
+  --tail TAIL
   
-  -r RC, --referenceControl RC  &nbsp;      the reference gene name of your sample, e.g. GAPDH
+  -r RC, --referenceControl RC 
   
-  -c EC, --experimentalControl EC&nbsp;     the control group name which your want to compare, e.g. hESC
+  -c EC, --experimentalControl EC
   
-  -o OUT, --outFileNamePrefix OUT &nbsp;    the output file name
+  -o OUT, --outFileNamePrefix OUT
   
-  --version      &nbsp;                      show program's version number and exit
-
+  --version  
 #####Extract Data from Original Data output
+
 **e.g.  python qpcrRead.py -f foo.xls --header 35 --tail 5  -o 20150625_NPC_Knockdown**
 
 #####Calculate Detal_Ct, Delta_Delta_Ct, Fold_Change and generate output file
