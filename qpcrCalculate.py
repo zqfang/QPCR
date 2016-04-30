@@ -3,28 +3,36 @@ This script used for calculateing DeltaCt, DeltaDeltaCt, FoldChange for QPCR
 '''
 from __future__ import print_function
 import argparse
-
+import sys
+import os
+import pandas as pd
 
 ########################### parse command line args############################################
-parser = argparse.ArgumentParser(description="Calculateing DeltaCt, DeltaDeltaCt, FoldChange for qpcr")
+parser = argparse.ArgumentParser(description="Calculating DeltaCt, DeDeltaCt, FoldChange for QPCR results.")
 
-parser.add_argument("-f","--file", action="store", dest="file",help="the file you want to analysis. ")
-parser.add_argument("-s","--sheetName", action="store",default="Results", dest="sheet", \
+parser.add_argument("-d","--data", action="store", dest="data", required=True, 
+                    help="the file you want to analysis. ")
+parser.add_argument("-s","--sheetName", action="store",default="Results", dest="sheet", required=True,
                      help="the sheet name of your excel file you want to analysis ")
-parser.add_argument("--header", action="store",type=int,dest="head", default=0,\
-                     help="header row you want to start with")
-parser.add_argument("--tail",action="store",type=int,dest="tail",default=0,\
-                     help="the tail rows of your excel file you want to drop")
-parser.add_argument("-r","--referenceControl", action="store", default="GAPDH", dest="rc", \
-                     help="the reference gene name of your sample, e.g. GAPDH")
-parser.add_argument("-c","--experimentalControl",action="store",dest="ec",\
-                     help="the control group name which your want to compare, e.g. hESC")
-parser.add_argument("-o","--outFileNamePrefix",action="store",default="foo",dest="out",\
+parser.add_argument("-r","--referenceControl", action="store", dest="rc", 
+                    required=True, help="the reference gene name of your sample, e.g. GAPDH")
+parser.add_argument("-e","--experimentalControl", action="store", dest="ec",
+                    required=True, help="the control group name which your want to compare, e.g. hESC")
+parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", dest="out",\
                      help="the output file name")
+parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
+                    choices=("bioRep", "techRep" ), default="techRep", 
+                    help="calculation mode. Choose from {'bioRep', 'techRep'}."+\
+                          "bioRep: using all data, techRep: only use first entry of replicates. Default: techRep.")
+parser.add_argument("--header", action="store", type=int, dest="head", default=0,\
+                     help="header row you want to start with")
+parser.add_argument("--tail", action="store",type=int, dest="tail", default=0,\
+                     help="the tail rows of your excel file you want to drop")
+
 parser.add_argument("--version",action="version",version="%(prog)s 1.0")
 args = parser.parse_args()
 
-print("InputFile        =", args.file)
+print("InputFile        =", args.data)
 print("SheetName        =", args.sheet)
 print("headerRow        =", args.head)
 print("tailRow          =", args.tail)
@@ -34,23 +42,18 @@ print("outFileName      =", args.out)
 
 ####################################################################
 
-input_file = args.file
-ref_ctrl = args.rc
-exp_ctrl   = args.ec
 
-import sys
-import os
-import numpy as np
-import pandas as pd
+ref_ctrl = args.rc
+exp_ctrl = args.ec
+
 
 # checking flies and parameters.
-if not os.path.exists(args.file) :
+if not os.path.exists(args.data) :
   print("InputFile doesn't exist, please check your file path!")
   sys.exit(1)
 # read data into a dataFrame
-data = pd.read_csv(input_file)
-print("The first 5 row in your original data is: ")
-print(data.head(5))
+data = pd.read_excel(args.data, args.sheet)
+
 
 # rename column name
 if 'Target Name' not in data:
@@ -62,35 +65,23 @@ if 'Target Name' not in data:
 
 
 # calculate Ct mean values for each replicates
+if args.mode == 'bioRep':
+    data2 = data.groupby(['Sample Name','Target Name']).mean().set_index(['Sample Name','Target Name'])
+else:
 
-data2 = data.groupby(['Sample Name','Target Name']).mean()
-#data2 = data2.set_index(['Sample Name','Target Name'])
 # instead of using groupby, you can remove duplicates using drop_duplicates
-# data0 = data.drop_duplicates(['Sample Name','Target Name']) 
-# data2 = data0.set_index(['Sample Name','Target Name'])
-
-print("The first 5 row in pre-processed(duplicates and NaN are filtered out) data is: ")
-print(data2.head(5))
+    data2 = data.drop_duplicates(['Sample Name','Target Name']).set_index(['Sample Name','Target Name'])
 
 
-#Assign your sample name and target name like this
-#sample = ['NT ES','NT MESEN','NT NE2','NT NE4','NT NE6','NT TROPH',\
-#           'RNAi ES','RNAi MESEN','RNAi NE2','RNAi NE4','RNAi NE6','RNAi TROPH'] 
-
-# or using set() to build an unordered collection of unique name of sample. 
-# However, set object is not itreatable, so we can convert set to list
-
-sample0 = set(data['Sample Name'])
-sample = list(sample0)
-
+sample = data['Sample Name'].unique()
 print("Your Samples are: ")
 print(sample)
-  
-#calculate Delta_Ct value, for better interpration,  I use 'GAPDH' as a internal control as demo.
 
+  
+#calculate Delta_Ct value.
 DelCt=pd.DataFrame()
 for i in range(len(sample)):
-    deltaCt =data2.loc[sample[i]]- data2.loc[(sample[i],ref_ctrl)]
+    deltaCt = data2.loc[sample[i]]- data2.loc[(sample[i], ref_ctrl)]
     deltaCt['Sample Name'] = sample[i]
     DelCt = DelCt.append(deltaCt)
        
@@ -100,16 +91,11 @@ DelCt.index.name = 'Target Name'
 DelCt2 = DelCt.reset_index()
 DelCt3 = DelCt2.set_index(['Sample Name','Target Name'])
 
-# If you want to rename column names, using this code 
-#DelCt3.rename(columns={'Ct': 'Delta Ct', 'Ct Mean': 'Delta CtMean'}, inplace=True)
+#rename column names
 DelCt3.rename(columns={'Ct Mean': 'DeltaCt'}, inplace=True)
 
-#DelCt3.to_csv('Delta_Ct.csv')
-print("The first 5 row in your Delta_Ct value is: ")
-print(DelCt3['DeltaCt'].head(5))
 
-#calculate Delta_Delta_Ct, for demo, I use 'NT ES' as our experiment control group.
-
+#calculate Delta_Delta_Ct
 DDelCt =pd.DataFrame()
 for i in range(len(sample)):
     DDeltaCt = DelCt3.loc[sample[i]]-DelCt3.loc[exp_ctrl]
@@ -117,45 +103,29 @@ for i in range(len(sample)):
     DDelCt = DDelCt.append(DDeltaCt)
     
 
-
-
-#reshape your dataFrame,export to a csv file
+#reshape your dataFrame
 DDelCt.index.name = 'Target Name'
 DDelCt2 = DDelCt.reset_index()
 DDelCt3 = DDelCt2.set_index(['Sample Name','Target Name'])
 DDelCt3.rename(columns={'DeltaCt': 'DDeltaCt'}, inplace=True)
 DDelCt4=DDelCt3.dropna(how='all')
-#DDelCt4.to_csv('Delta_Delta_Ct.csv')
 
-print("The first 5 row in your Delta_Delta_Ct values is: ")
-print(DDelCt3['DDeltaCt'].head(5))
 
 # calculate FoldChange, and export to a csv file
-
 foldChange0 = pow(2,-DDelCt4)
-foldChange0.rename(columns={'DDeltaCt':'FoldChange'},inplace=True)
+foldChange0.rename(columns={'DDeltaCt':'FoldChange'}, inplace=True)
 foldChange = foldChange0.drop(exp_ctrl,level=0)
 foldChange1 = foldChange0.drop(ref_ctrl,level=1)
-#foldChange1.to_csv('FoldChange.csv')
 
-print("The first 5 row in your FoldChange values is: ")
-print(foldChange1['FoldChange'].head(5))
-
-    
+  
 #reshape your final results
 #extract columns you needed,remain as DataFrame object using double bracket.
 #for merging columns esayliy
 
-d1=data2[['Ct Mean']]
-d2=DelCt3[['DeltaCt']]
-d3=DDelCt4[['DDeltaCt']]
-d4=foldChange0[['FoldChange']]
-
 #merge data,export to a csv file.
-
-m1=pd.merge(d1,d2,left_index=True,right_index=True)
-m2=pd.merge(m1,d3,left_index=True,right_index=True)
-final_report=pd.merge(m2,d4,left_index=True,right_index=True)
+m1=pd.merge(data2[['Ct Mean']], DelCt3[['DeltaCt']], left_index=True, right_index=True)
+m2=pd.merge(m1, DDelCt4[['DDeltaCt']], left_index=True, right_index=True)
+final_report=pd.merge(m2, foldChange0[['FoldChange']], left_index=True, right_index=True)
 final_report.index.names=['Sample Name','Target Name']
 final_report.to_csv(args.out+'_final_results.csv')
 
@@ -164,3 +134,4 @@ print(final_report.head(5))
 
 print("Program ran successfully")
 print("Good Job! Cheers!!!" )
+

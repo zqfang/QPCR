@@ -7,13 +7,14 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+import pandas as pd
 
 # parse command line args
 parser = argparse.ArgumentParser(description="Extract qpcr data from ABi machine")
 
 parser.add_argument("-m","--machine",choices=['viia7','7900'],default="viia7",dest="machine",\
                      help="Choose platform which data was generated from: viia7 or 7900. default: viia7.")
-parser.add_argument("-f","--file", action="store", dest="file",help="the excel file you want to analysis ")
+parser.add_argument("-d","--data", action="store", dest="data",help="the excel file you want to analysis ")
 parser.add_argument("-s","--sheetName", action="store",default="Results", dest="sheet", \
                      help="the sheet name of your excel file you want to analysis ")
 parser.add_argument("--header", action="store",type=int,dest="head", default=35,\
@@ -29,7 +30,7 @@ parser.add_argument("-o","--outFileNamePrefix",action="store",default="foo",dest
 parser.add_argument("--version",action="version",version="%(prog)s 1.0")
 args = parser.parse_args()
 
-print("ExeclFile        =", args.file)
+print("ExeclFile        =", args.data)
 print("Platform         =", args.machine)
 print("SheetName        =", args.sheet)
 print("headerRow        =", args.head)
@@ -41,21 +42,19 @@ print("outFileName      =", args.out)
 col_viia = ['Sample Name','Target Name','CT','Ct Mean','Ct SD']
 col_7900 = ['Sample Name','Detector Name','Ct','Ct Mean','Ct StdEV']
 # checking flies and parameters.
-if not os.path.exists(args.file) :
+if not os.path.exists(args.data) :
   print("InputFile doesn't exist, please check your file path!")
   sys.exit(1)
 
 print("Input File Checking passed !")
 
-import numpy as np
-import pandas as pd
 
 # Read data into pandas DataFrame Object
 if args.machine == 'viia7':
-    data0 = pd.read_excel(args.file,sheetname=args.sheet,header= args.head)
+    data0 = pd.read_excel(args.data, sheetname=args.sheet, header= args.head)
     
 elif args.machine == '7900':
-    data0 = pd.read_table(args.file,header= args.head)
+    data0 = pd.read_table(args.data, header= args.head)
 else:
     print("-m args error, plesea refine your args")
     sys.exit(1)
