@@ -35,34 +35,34 @@ python qpcrCalculate.py -h
 
 ####Parameters
 
-usage: qpcrCalculate.py [-h] -d DATA -s SHEET -i IC -e EC [-o OUT]
-                        [-m {bioRep,techRep}] [--header HEAD] [--tail TAIL]
-                        [--version]
+>usage: qpcrCalculate.py [-h] -d DATA -s SHEET -i IC -e EC [-o OUT]
+>                        [-m {bioRep,techRep}] [--header HEAD] [--tail TAIL]
+>                        [--version]
 
 Calculating DeltaCt, DeDeltaCt, FoldChange for QPCR results.
 
-arguments:
-
-  -h, --help            show this help message and exit
-  -d DATA, --data DATA  the file you want to analysis.
-  -s SHEET, --sheetName SHEET
-                        the sheet name of your excel file you want to analysis
-  -i IC, --internalControl IC
-                        the internal control gene name of your sample, e.g.
-                        GAPDH
-  -e EC, --experimentalControl EC
-                        the control group name which your want to compare,
-                        e.g. hESC
-  -o OUT, --outFileNamePrefix OUT
-                        the output file name
-  -m {bioRep,techRep}, --mode {bioRep,techRep}
-                        calculation mode. Choose from {'bioRep',
-                        'techRep'}.bioRep: using all data to caluclate mean
-                        DeltaCT, techRep: only use first entry of replicates.
-                        Default: techRep.
-  --header HEAD         header row you want to start with
-  --tail TAIL           the tail rows of your excel file you want to drop
-  --version             show program's version number and exit
+>arguments:
+>
+> -h, --help            show this help message and exit
+>  -d DATA, --data DATA  the file you want to analysis.
+>  -s SHEET, --sheetName SHEET
+>                        the sheet name of your excel file you want to analysis
+>  -i IC, --internalControl IC
+>                        the internal control gene name of your sample, e.g.
+>                        GAPDH
+>  -e EC, --experimentalControl EC
+>                        the control group name which your want to compare,
+>                        e.g. hESC
+>  -o OUT, --outFileNamePrefix OUT
+>                        the output file name
+>  -m {bioRep,techRep}, --mode {bioRep,techRep}
+>                        calculation mode. Choose from {'bioRep',
+>                        'techRep'}.bioRep: using all data to caluclate mean
+>                        DeltaCT, techRep: only use first entry of replicates.
+>                        Default: techRep.
+>  --header HEAD         header row you want to start with
+>  --tail TAIL           the tail rows of your excel file you want to drop
+>  --version             show program's version number and exit
 
  
 #####Extract Data from Original Data output
