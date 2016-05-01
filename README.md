@@ -1,20 +1,18 @@
-# qRT-PCR 
+# QPCRpy 
 
-### Process You qRT-PCR Results Easy  
-=====================================
+### Compute QPCR results from QPCR raw output  
+==============================================
 
 
      
-These python programs aim at calculating the **Delta_Ct, Delta_Delta_Ct and FoldChange** value which
+These python scripts aim at calculating the **Delta_Ct, Delta_Delta_Ct and FoldChange** value which
 produced by Quantitative real time polymerase chain reaction.
     
-**Pandas**, a python data analysis tool, is required for using this script.
-
 **Matplotlib**, a python plotting interface to Matlab, is required for generate plots.
     
 The following file formats are supported: **xls, xlsx, csv, txt**. 
     
-In addition, your should specify **reference control** name and **expriment control** name for your own data sets.
+In addition, your should specify **internal control** name and **exprimental control** name for your own data sets.
     
 For **ABi 7900** users, data column names must be 'Sample Name','Detector Name','Ct','Ct Mean'. But 'Ct StdEV' is optional.
 
@@ -57,9 +55,9 @@ Calculating DeltaCt, DeDeltaCt, FoldChange for QPCR results.
       -o OUT, --outFileNamePrefix OUT
                             the output file name
       -m {bioRep,techRep}, --mode {bioRep,techRep}
-                           calculation mode. Choose from {'bioRep',
-                           'techRep'}.bioRep: using all data to caluclate mean
-                            DeltaCT, techRep: only use first entry of replicates.
+                            calculation mode. Choose from {'bioRep',
+                            'techRep'}.bioRep: using all data to caluclate DeltaCT
+                            mean, techRep: only use first entry of replicates.
                             Default: techRep.
       --header HEAD         header row you want to start with
       --tail TAIL           the tail rows of your excel file you want to drop
@@ -70,7 +68,7 @@ Calculating DeltaCt, DeDeltaCt, FoldChange for QPCR results.
 
 **e.g.**  
     
-    python qpcrRead.py -f foo.xls --header 35 --tail 5  -o 20150625_NPC_Knockdown
+    python qpcrRead.py -d foo.xls --header 35 --tail 5  -o 20150625_NPC_Knockdown
 
 #####Calculate Detal_Ct, Delta_Delta_Ct, Fold_Change and generate output file
 
@@ -80,7 +78,7 @@ In addition, you can reshape your own data structure the same as testDataSet.txt
 
 **e.g.** 
 
-    python qpcrCalculte.py -f foo.csv -r GAPDH -c hESC -o 20150625_NPC_Knockdown
+    python qpcrCalculte.py -d foo.csv -i GAPDH -c hESC -o 20150625_NPC_Knockdown
 
 #####Generate Plots: line, bar plot
 
