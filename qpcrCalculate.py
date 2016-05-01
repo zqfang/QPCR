@@ -14,8 +14,8 @@ parser.add_argument("-d","--data", action="store", dest="data", required=True,
                     help="the file you want to analysis. ")
 parser.add_argument("-s","--sheetName", action="store",default="Results", dest="sheet", required=True,
                      help="the sheet name of your excel file you want to analysis ")
-parser.add_argument("-r","--referenceControl", action="store", dest="rc", 
-                    required=True, help="the reference gene name of your sample, e.g. GAPDH")
+parser.add_argument("-i","--internalControl", action="store", dest="ic", 
+                    required=True, help="the internal control gene name of your sample, e.g. GAPDH")
 parser.add_argument("-e","--experimentalControl", action="store", dest="ec",
                     required=True, help="the control group name which your want to compare, e.g. hESC")
 parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", dest="out",\
@@ -23,7 +23,7 @@ parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", d
 parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
                     choices=("bioRep", "techRep" ), default="techRep", 
                     help="calculation mode. Choose from {'bioRep', 'techRep'}."+\
-                          "bioRep: using all data, techRep: only use first entry of replicates. Default: techRep.")
+                          "bioRep: using all data to caluclate mean DeltaCT, techRep: only use first entry of replicates. Default: techRep.")
 parser.add_argument("--header", action="store", type=int, dest="head", default=0,\
                      help="header row you want to start with")
 parser.add_argument("--tail", action="store",type=int, dest="tail", default=0,\
@@ -36,14 +36,14 @@ print("InputFile        =", args.data)
 print("SheetName        =", args.sheet)
 print("headerRow        =", args.head)
 print("tailRow          =", args.tail)
-print("ReferenceControl =", args.rc)
+print("ReferenceControl =", args.ic)
 print("ExperimentControl=", args.ec)
 print("outFileName      =", args.out)
 
 ####################################################################
 
 
-ref_ctrl = args.rc
+ref_ctrl = args.ic
 exp_ctrl = args.ec
 
 
