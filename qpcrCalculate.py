@@ -8,7 +8,7 @@ import os
 import pandas as pd
 
 ########################### parse command line args############################################
-def main():
+def parse_cli():
     parser = argparse.ArgumentParser(description="Calculate Delta Ct, DDelta Ct, Fold Changes for QPCR results.")
 
     parser.add_argument("-d","--data", action="store", dest="data", required=True,
@@ -25,11 +25,11 @@ def main():
     parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
                         choices=("bioRep", "techRep" ), default="bioRep",
                         help="calculation mode. Choose from {'bioRep', 'techRep'}."+\
-                              "bioRep: using all data to caluclate mean DeltaCT.\n"+\
+                              "bioRep: using all data to calculate mean DeltaCT.\n"+\
                               "techRep: only use first entry of replicates. Default: bioRep.")
-    parser.add_argument("--header", action="store", type=int, dest="head", default=0,\
+    parser.add_argument("--header", action="store", type=int, dest="head", default=0,
                          help="Row (0-indexed) to use for the column labels of the parsed DataFrame")
-    parser.add_argument("--tail", action="store",type=int, dest="tail", default=0,\
+    parser.add_argument("--tail", action="store",type=int, dest="tail", default=0,
                          help="the tail rows of your excel file you want to skip (0-indexed)")
 
     parser.add_argument("--version",action="version",version="%(prog)s 1.0")
@@ -137,7 +137,7 @@ def calculate(args):
 
     #reshape your final results
     #extract columns you needed,remain as DataFrame object using double bracket.
-    #for merging columns esayliy
+    #for merging columns easily
 
     #merge data,export to a csv file.
     m1=pd.merge(data2[['Ct Mean']], DelCt3[['Delta Ct']], left_index=True, right_index=True)
@@ -150,7 +150,7 @@ def calculate(args):
 
 
 if __name__ == "__main__":
-    args = main()
+    args = parse_cli()
     print("InputFile        =", args.data)
     print("SheetName        =", args.sheet)
     print("headerRow        =", args.head)

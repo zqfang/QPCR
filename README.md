@@ -24,7 +24,6 @@ exactly the same as **test_interest_data.xls**.
 Python2.7 or Python3+
 
 * pandas
-* matplotlib
 
 ### Before use this module, see help
 
@@ -69,7 +68,7 @@ Calculate Delta Ct, DDelta Ct, Fold Changes for QPCR results.
 **e.g.**  
 
 ```bash
-    python qpcrRead.py -d h9_vii7_export.xls --header 35 --tail 5  -o 20150625_NPC_Knockdown
+    python qpcrRead.py -d test/h9_vii7_export.xls --header 35 --tail 5  -o test/output
 ```
 
 ##### Calculate Detal_Ct, Delta_Delta_Ct, Fold_Change and generate output file
@@ -81,9 +80,9 @@ For other RT-QPCR output formats, you can reshape your own data structure the sa
 **e.g.**
 
 ```bash
-    python qpcrCalculate.py -d test_interest_data.xls -s Sheet1 \
+    python qpcrCalculate.py -d test/test_interest_data.xls -s Sheet1 \
                             -i GAPDH  -e H9_NT_LSB_D16 \
-                            -o 20150625_NPC_Knockdown
+                            -o test/20150625_NPC_Knockdown
 ```
 
 #### Generate Plots: line, bar plot

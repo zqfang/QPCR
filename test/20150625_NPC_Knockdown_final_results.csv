@@ -1,4 +1,4 @@
-Sample Name,Target Name,Ct Mean,DeltaCt,DDeltaCt,FoldChange
+Sample Name,Target Name,Ct Mean,Delta Ct,DDelta Ct,Fold Changes
 H9_NT_LSB_D16,ASCL1,26.2385253906,10.9965963363,0.0,1.0
 H9_NT_LSB_D16,FOXG1,30.7194976807,15.477568626400002,0.0,1.0
 H9_NT_LSB_D16,GAPDH,15.2419290543,0.0,0.0,1.0
