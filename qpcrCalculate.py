@@ -43,26 +43,38 @@ def parse_input(args):
         print("InputFile doesn't exist, please check your file path!")
         sys.exit(1)
     # read data into a dataFrame
-    data = pd.read_excel(io=args.data, sheetname=args.sheet,
+    suffix = args.data.split(".")[-1]
+    if suffix in ['xls','xlsx']:
+        data = pd.read_excel(io=args.data, sheetname=args.sheet,
                          header=args.head, skip_footer=args.tail)
-    # check column
-    print("You input data columns are:")
-    print(data.columns.tolist())
+    elif suffix == 'csv':
+        data = pd.read_csv(args.data, header=args.head, skip_footer=args.tail)
+    elif suffix == 'txt':
+        data = pd.read_table(args.data, header=args.head, skip_footer=args.tail)
+    else:
+        print("Unsupported file format input. Please use xls,xlsx. csv, txt format!")
+        sys.exit(1)
+
     # rename column name
     if 'Target Name' not in data:
         if 'Detector Name' in data:
+            # ABI 7900
             data.rename(columns={'Ct': 'CT','Detector Name':'Target Name','Ct StdEV':'Ct SD'}, inplace=True)
         else:
+            print("User defined Data Input.")
+            print("You input data columns are:")
+            print(data.columns.tolist())
+
             print("""
-                  Column name error! Plesase rename your column name! like this:
+                  Column name error! Please rename your column name exactly like this:
     
                   | Sample Name | Target Name | CT | Ct Mean | Ct SD |
     
-                  Note: these two columns are optional:
+                  Note: these columns are optional:
                         | Ct SD |
-    
                   """)
             sys.exit(1)
+
 
     args.df = data
     return args
