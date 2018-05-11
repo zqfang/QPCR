@@ -35,18 +35,15 @@ Python2.7 or Python3+
 
 #### Parameters
 
-Calculating DeltaCt, DeDeltaCt, FoldChange for QPCR results.
+Calculate Delta Ct, DDelta Ct, Fold Changes for QPCR results.
 
-    usage: qpcrCalculate.py [-h] -d DATA -s SHEET -i IC -e EC [-o OUT]
-                            [-m {bioRep,techRep}] [--header HEAD] [--tail TAIL]
-                            [--version]
-
-    arguments:
-
+    optional arguments:
       -h, --help            show this help message and exit
       -d DATA, --data DATA  the file you want to analysis.
       -s SHEET, --sheetName SHEET
-                            the sheet name of your excel file you want to analysis
+                            str, int. the sheet name of your excel file you want
+                            to analysis.Strings are used for sheet names, Integers
+                            are used in zero-indexed sheet positions.
       -i IC, --internalControl IC
                             the internal control gene name of your sample, e.g.
                             GAPDH
@@ -57,11 +54,13 @@ Calculating DeltaCt, DeDeltaCt, FoldChange for QPCR results.
                             the output file name
       -m {bioRep,techRep}, --mode {bioRep,techRep}
                             calculation mode. Choose from {'bioRep',
-                            'techRep'}.bioRep: using all data to caluclate DeltaCT
-                            mean, techRep: only use first entry of replicates.
-                            Default: techRep.
-      --header HEAD         header row you want to start with
-      --tail TAIL           the tail rows of your excel file you want to drop
+                            'techRep'}.bioRep: using all data to caluclate mean
+                            DeltaCT. techRep: only use first entry of replicates.
+                            Default: bioRep.
+      --header HEAD         Row (0-indexed) to use for the column labels of the
+                            parsed DataFrame
+      --tail TAIL           the tail Rows of your excel file you want to skip
+                            (0-indexed)
       --version             show program's version number and exit
 
 
