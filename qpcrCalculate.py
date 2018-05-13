@@ -21,13 +21,14 @@ def parse_cli():
                         required=True, help="the internal control gene name of your sample, e.g. GAPDH")
     parser.add_argument("-e","--experimentalControl", action="store", dest="ec",
                         required=True, help="the control group name which your want to compare, e.g. hESC")
-    parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", dest="out",\
+    parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", dest="out",
                          help="the output file name")
     parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
                         choices=("bioRep", "techRep","dropOutlier" ), default="bioRep",
                         help="calculation mode. Choose from {'bioRep', 'techRep','dropOutlier'}."+\
-                              "bioRep: using all data to calculate mean DeltaCT.\n"+\
-                              "techRep: only use first entry of replicates. Default: bioRep.")
+                              "'bioRep': using all data to calculate mean DeltaCT."+\
+                              "'techRep': only use first entry of replicates."+\
+                              "'dropOutlier': if sd < 0.5, reject outlier and recalculate mean CT Default: bioRep.")
     parser.add_argument("--header", action="store", type=int, dest="head", default=0,
                          help="Row (0-indexed) to use for the column labels of the parsed DataFrame")
     parser.add_argument("--tail", action="store",type=int, dest="tail", default=0,
