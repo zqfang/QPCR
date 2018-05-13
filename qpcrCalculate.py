@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import sys
 import os
+import numpy as np
 import pandas as pd
 
 ########################### parse command line args############################################
@@ -23,8 +24,8 @@ def parse_cli():
     parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", dest="out",\
                          help="the output file name")
     parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
-                        choices=("bioRep", "techRep" ), default="bioRep",
-                        help="calculation mode. Choose from {'bioRep', 'techRep'}."+\
+                        choices=("bioRep", "techRep","dropOutlier" ), default="bioRep",
+                        help="calculation mode. Choose from {'bioRep', 'techRep','dropOutlier'}."+\
                               "bioRep: using all data to calculate mean DeltaCT.\n"+\
                               "techRep: only use first entry of replicates. Default: bioRep.")
     parser.add_argument("--header", action="store", type=int, dest="head", default=0,
@@ -79,6 +80,22 @@ def parse_input(args):
     args.df = data
     return args
 
+def reject_outliers(data, m = 2.):
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    s = d/(mdev if mdev else 1.)
+    return data[s<m]
+
+
+def mininal_min(arr):
+    arr_std = np.std(arr)
+    if arr_std < 0.5:
+        mmin = np.mean(arr)
+    else:
+        temp = reject_outliers(arr)
+        mmin = temp.mean()
+    return mmin
+
 
 def calculate(args):
     """ main program"""
@@ -88,9 +105,18 @@ def calculate(args):
     # calculate Ct mean values for each replicates
     if args.mode == 'bioRep':
         data2 = data.groupby(['Sample Name','Target Name']).mean()
-    else:
+    elif args.mode == 'techRep':
         # instead of using groupby, you can remove duplicates using drop_duplicates
+        # tech replicates need to drop outliers
         data2 = data.drop_duplicates(['Sample Name','Target Name']).set_index(['Sample Name','Target Name'])
+    elif args.mode == 'dropOutlier':
+        # find to drop outliers in each data point, the calculate CT mean
+        data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(mininal_min)
+        data2 = pd.DataFrame(data2)
+        data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
+    else:
+        print("No supported method for further calculation")
+        sys.exit(1)
 
 
     sample = data['Sample Name'].unique()
