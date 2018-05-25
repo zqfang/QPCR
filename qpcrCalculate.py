@@ -109,6 +109,7 @@ def calculate(args):
     elif args.mode == 'techRep':
         # instead of using groupby, you can remove duplicates using drop_duplicates
         # tech replicates need to drop outliers
+        # this means you already have a 'CT mean' column exists
         data2 = data.drop_duplicates(['Sample Name','Target Name']).set_index(['Sample Name','Target Name'])
     elif args.mode == 'dropOutlier':
         # find to drop outliers in each data point, the calculate CT mean
@@ -158,8 +159,8 @@ def calculate(args):
     # calculate FoldChange, and export to a csv file
     foldChange0 = pow(2,-DDelCt4)
     foldChange0.rename(columns={'DDelta Ct':'Fold Changes'}, inplace=True)
-    foldChange = foldChange0.drop(exp_ctrl,level=0)
-    foldChange1 = foldChange0.drop(ref_ctrl,level=1)
+    #foldChange = foldChange0.drop(exp_ctrl,level=0)
+    #foldChange1 = foldChange0.drop(ref_ctrl,level=1)
 
 
     #reshape your final results
@@ -167,11 +168,14 @@ def calculate(args):
     #for merging columns easily
 
     #merge data,export to a csv file.
-    m1=pd.merge(data2[['Ct Mean']], DelCt3[['Delta Ct']], left_index=True, right_index=True)
-    m2=pd.merge(m1, DDelCt4[['DDelta Ct']], left_index=True, right_index=True)
-    final_report=pd.merge(m2, foldChange0[['Fold Changes']], left_index=True, right_index=True)
+    #m1=pd.merge(data2[['Ct Mean']], DelCt3[['Delta Ct']], left_index=True, right_index=True)
+    #m2=pd.merge(m1, DDelCt4[['DDelta Ct']], left_index=True, right_index=True)
+    #final_report=pd.merge(m2, foldChange0[['Fold Changes']], left_index=True, right_index=True)
+    final_report = pd.concat([data2[['Ct Mean']], DelCt3[['Delta Ct']],
+                              DDelCt4[['DDelta Ct']],foldChange0[['Fold Changes']]],axis=1,)
     final_report.index.names=['Sample Name','Target Name']
     final_report.to_csv(args.out+'_final_results.csv')
+
     print('The first 5 rows in your Final results: ')
     print(final_report.head(5))
 
