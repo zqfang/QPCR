@@ -24,11 +24,11 @@ def parse_cli():
     parser.add_argument("-o","--outFileNamePrefix", action="store", default="foo", dest="out",
                          help="the output file name")
     parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
-                        choices=("bioRep", "techRep","dropOutlier" ), default="bioRep",
-                        help="calculation mode. Choose from {'bioRep', 'techRep','dropOutlier'}."+\
+                        choices=("bioRep", "techRep","dropOut" ), default="bioRep",
+                        help="calculation mode. Choose from {'bioRep', 'techRep','dropOut'}."+\
                               "'bioRep': using all data to calculate mean DeltaCT."+\
                               "'techRep': only use first entry of replicates."+\
-                              "'dropOutlier': if sd < 0.5, reject outlier and recalculate mean CT Default: bioRep.")
+                              "'dropOut': if sd < 0.5, reject outlier and recalculate mean CT Default: bioRep.")
     parser.add_argument("--header", action="store", type=int, dest="head", default=0,
                          help="Row (0-indexed) to use for the column labels of the parsed DataFrame")
     parser.add_argument("--tail", action="store",type=int, dest="tail", default=0,
@@ -47,7 +47,7 @@ def parse_input(args):
     # read data into a dataFrame
     suffix = args.data.split(".")[-1]
     if suffix in ['xls','xlsx']:
-        data = pd.read_excel(io=args.data, sheetname=args.sheet,
+        data = pd.read_excel(io=args.data, sheet_name=args.sheet,
                          header=args.head, skip_footer=args.tail)
     elif suffix == 'csv':
         data = pd.read_csv(args.data, header=args.head, skip_footer=args.tail)
@@ -83,16 +83,16 @@ def parse_input(args):
     return args
 
 def reject_outliers(data, m = 2.):
-    d = np.abs(data - np.median(data))
-    mdev = np.median(d)
+    d = np.abs(data - np.nanmedian(data))
+    mdev = np.nanmedian(d)
     s = d/(mdev if mdev else 1.)
     return data[s<m]
 
 
 def mininal_min(arr):
-    arr_std = np.std(arr)
+    arr_std = np.nanstd(arr)
     if arr_std < 0.5:
-        mmin = np.mean(arr)
+        mmin = np.nanmean(arr)
     else:
         temp = reject_outliers(arr)
         mmin = temp.mean()
@@ -106,13 +106,13 @@ def calculate(args):
     data = args.df
     # calculate Ct mean values for each replicates
     if args.mode == 'bioRep':
-        data2 = data.groupby(['Sample Name','Target Name']).mean()
+        data2 = data.groupby(['Sample Name','Target Name']).mean(skipna=True, numeric_only=True)
     elif args.mode == 'techRep':
         # instead of using groupby, you can remove duplicates using drop_duplicates
         # tech replicates need to drop outliers
         # this means you already have a 'CT mean' column exists
         data2 = data.drop_duplicates(['Sample Name','Target Name']).set_index(['Sample Name','Target Name'])
-    elif args.mode == 'dropOutlier':
+    elif args.mode == 'dropOut':
         # find to drop outliers in each data point, the calculate CT mean
         data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(mininal_min)
         data2 = pd.DataFrame(data2)

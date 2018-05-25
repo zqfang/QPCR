@@ -45,12 +45,12 @@ Python2.7 or Python3+
                             e.g. hESC
       -o, --outFileNamePrefix OUT
                             the output file name
-      -m, --mode {bioRep,techRep, dropOutlier}
+      -m, --mode {bioRep,techRep, dropOut}
                             calculation mode. Choose from {'bioRep',
-                            'techRep','dropOutlier'}.
+                            'techRep','dropOut'}.
                             'bioRep': using all data to calculate mean CT.
                             'techRep': only use first entry of replicates.
-                            'dropOutlier': if sd < 0.5, reject outlier and
+                            'dropOut': if sd < 0.5, reject outlier and
                             recalculate mean CT Default: bioRep.
       --header HEAD         Row (0-indexed) to use for the column labels of the
                             parsed DataFrame
