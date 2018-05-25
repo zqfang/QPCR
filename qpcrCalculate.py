@@ -76,7 +76,8 @@ def parse_input(args):
                         | Ct SD |
                   """)
             sys.exit(1)
-
+    # convert "undetermined to NA"
+    data.iloc[:,2:] = data.iloc[:,2:].apply(pd.to_numeric, errors='coerce', axis=1)
 
     args.df = data
     return args
