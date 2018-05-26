@@ -7,6 +7,7 @@ import sys
 import os
 import numpy as np
 import pandas as pd
+from itertools import combinations
 
 ########################### parse command line args############################################
 def parse_cli():
@@ -89,15 +90,25 @@ def reject_outliers(data, m = 2.):
     return data[s<m]
 
 
-def mininal_min(arr):
+def min_mean(arr):
     arr_std = np.nanstd(arr)
     if arr_std < 0.5:
-        mmin = np.nanmean(arr)
+        mmean = np.nanmean(arr)
     else:
         temp = reject_outliers(arr)
-        mmin = temp.mean()
-    return mmin
+        mmean = temp.mean()
+    return mmean
 
+def min_mean2(arr):
+    na = np.isnan(arr)
+    na_num,arr_len = na.sum(),len(arr)
+    if na_num == arr_len: return np.NaN
+    arr_std = np.nanstd(arr)
+    if arr_std < 0.5:
+        mmean = np.nanmean(arr)
+    else:
+        mmean = np.array(list(combinations(arr[~na], arr_len-na_num))).mean().min()
+    return mmean
 
 def calculate(args):
     """ main program"""
@@ -106,7 +117,7 @@ def calculate(args):
     data = args.df
     # calculate Ct mean values for each replicates
     if args.mode == 'bioRep':
-        data2 = data.groupby(['Sample Name','Target Name']).mean(skipna=True, numeric_only=True)
+        data2 = data.groupby(['Sample Name','Target Name']).mean()
     elif args.mode == 'techRep':
         # instead of using groupby, you can remove duplicates using drop_duplicates
         # tech replicates need to drop outliers
@@ -114,7 +125,7 @@ def calculate(args):
         data2 = data.drop_duplicates(['Sample Name','Target Name']).set_index(['Sample Name','Target Name'])
     elif args.mode == 'dropOut':
         # find to drop outliers in each data point, the calculate CT mean
-        data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(mininal_min)
+        data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean2)
         data2 = pd.DataFrame(data2)
         data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
     else:
