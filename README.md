@@ -1,7 +1,12 @@
 # QPCR
 
-Two python scripts aim at calculating the **Delta_Ct, Delta_Delta_Ct and FoldChange** value which
+Three python scripts aim at calculating the **Delta_Ct, Delta_Delta_Ct, Fold Changes, Student's t-test, and P-value** value which
 produced by Quantitative real time polymerase chain reaction (qRT-PCR).
+
+### Why
+
+I have too much qpcr data to process. It costs me a lot of time. I want a simple way to do this.
+
 
 ### Compute QPCR results from QPCR output
 Notes:
@@ -19,13 +24,18 @@ The following file formats are supported: **xls, xlsx, csv, txt**.
 Python2.7 or Python3+
 
 * numpy
+* scipy: for t-test
 * pandas
+* matplotlib: for plotting (to do)
 
 ### Before use this module, see help
-
+```bash
     python qpcrRead.py -h
 
     python qpcrCalculate.py -h
+
+    python qpcrStat.py -h
+```
 
 
 #### Parameters for qpcrCalculate.py
@@ -83,6 +93,21 @@ The following file formats are supported: **xls, xlsx, csv, txt**.
                             -i GAPDH  -e H9_NT_LSB_D16 \
                             -o test/20150625_NPC_Knockdown
 ```
+
+### Perform Student's t-test from n independent experiments.
+Note: use `qpcrCalulate.py` outputs
+
+The following file formats are supported: **xls, xlsx, csv, txt**.
+**e.g.**
+
+```bash
+    python qpcrStat.py -d test/test_stat_input.xls \
+                            -i GAPDH \
+                            -e H9_NT_LSB_D16 \
+                            -m stat \
+                            -o test/20150625_NPC_Knockdown
+```
+
 
 ## To Do List
 

@@ -110,7 +110,7 @@ def min_mean2(arr):
         mmean = np.array(list(combinations(arr[~na], arr_len-na_num))).mean().min()
     return mmean
 
-def calculate(args):
+def run(args):
     """ main program"""
     ref_ctrl = args.ic
     exp_ctrl = args.ec
@@ -132,8 +132,12 @@ def calculate(args):
         print("No supported method for further calculation")
         sys.exit(1)
 
+def calculate(args, df):
 
-    sample = data['Sample Name'].unique()
+    ref_ctrl = args.ic
+    exp_ctrl = args.ec
+    data2 = df
+    sample = args.df['Sample Name'].unique()
     print("Your Samples are: ")
     print(sample)
 
@@ -141,7 +145,7 @@ def calculate(args):
     #calculate Delta_Ct value.
     DelCt=pd.DataFrame()
     for i in range(len(sample)):
-        deltaCt = data2.loc[sample[i]]- data2.loc[(sample[i], ref_ctrl)]
+        deltaCt = df.loc[sample[i]]- df.loc[(sample[i], args.ic)]
         deltaCt['Sample Name'] = sample[i]
         DelCt = DelCt.append(deltaCt)
 
@@ -156,7 +160,7 @@ def calculate(args):
     #calculate Delta_Delta_Ct
     DDelCt =pd.DataFrame()
     for i in range(len(sample)):
-        DDeltaCt = DelCt3.loc[sample[i]]-DelCt3.loc[exp_ctrl]
+        DDeltaCt = DelCt3.loc[sample[i]]-DelCt3.loc[args.ec]
         DDeltaCt['Sample Name'] = sample[i]
         DDelCt = DDelCt.append(DDeltaCt)
 
@@ -171,18 +175,13 @@ def calculate(args):
     # calculate FoldChange, and export to a csv file
     foldChange0 = np.power(2,-DDelCt4)
     foldChange0.rename(columns={'DDelta Ct':'Fold Changes'}, inplace=True)
-    #foldChange = foldChange0.drop(exp_ctrl,level=0)
-    #foldChange1 = foldChange0.drop(ref_ctrl,level=1)
-
-
     #reshape your final results
-    final_report = pd.concat([data2[['Ct Mean']], DelCt3[['Delta Ct']],
+    final_report = pd.concat([df[['Ct Mean']], DelCt3[['Delta Ct']],
                               DDelCt4[['DDelta Ct']],foldChange0[['Fold Changes']]],axis=1,)
-    final_report.index.names=['Sample Name','Target Name']
     final_report.to_csv(args.out+'_final_results.csv')
 
-    print('The first 5 rows in your Final results: ')
-    print(final_report.head(5))
+    print('The first 8 rows in your Final results: ')
+    print(final_report.head(8))
 
 
 if __name__ == "__main__":
