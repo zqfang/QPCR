@@ -169,20 +169,13 @@ def calculate(args):
 
 
     # calculate FoldChange, and export to a csv file
-    foldChange0 = pow(2,-DDelCt4)
+    foldChange0 = np.power(2,-DDelCt4)
     foldChange0.rename(columns={'DDelta Ct':'Fold Changes'}, inplace=True)
     #foldChange = foldChange0.drop(exp_ctrl,level=0)
     #foldChange1 = foldChange0.drop(ref_ctrl,level=1)
 
 
     #reshape your final results
-    #extract columns you needed,remain as DataFrame object using double bracket.
-    #for merging columns easily
-
-    #merge data,export to a csv file.
-    #m1=pd.merge(data2[['Ct Mean']], DelCt3[['Delta Ct']], left_index=True, right_index=True)
-    #m2=pd.merge(m1, DDelCt4[['DDelta Ct']], left_index=True, right_index=True)
-    #final_report=pd.merge(m2, foldChange0[['Fold Changes']], left_index=True, right_index=True)
     final_report = pd.concat([data2[['Ct Mean']], DelCt3[['Delta Ct']],
                               DDelCt4[['DDelta Ct']],foldChange0[['Fold Changes']]],axis=1,)
     final_report.index.names=['Sample Name','Target Name']
