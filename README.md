@@ -34,41 +34,51 @@ Python2.7 or Python3+
 
     python qpcrCalculate.py -h
 
-    python qpcrStat.py -h
 ```
 
 
 #### Parameters for qpcrCalculate.py
 
+Parameters:
+```
+    usage: qpcrCalculate.py [-h] -d DATA [-s SHEET] [-i IC] -e EC [-o OUT]
+                            [-m {bioRep,techRep,dropOut,stat}] [--header HEAD]
+                            [--tail TAIL] [--version]
+```
+
+Calculate Delta Ct, DDelta Ct, Fold Changes, P-values for QPCR results.
+```
     optional arguments:
       -h, --help            show this help message and exit
-      -d, --data DATA  the file you want to analysis.
-      -s, --sheetName SHEET
+      -d DATA, --data DATA  the file(s) you want to analysis. For multi-file
+                            input, separate each file by comma.
+      -s SHEET, --sheetName SHEET
                             str, int. the sheet name of your excel file you want
                             to analysis.Strings are used for sheet names, Integers
                             are used in zero-indexed sheet positions.
-      -i, --internalControl IC
+      -i IC, --internalControl IC
                             the internal control gene name of your sample, e.g.
                             GAPDH
-      -e, --experimentalControl EC
+      -e EC, --experimentalControl EC
                             the control group name which your want to compare,
                             e.g. hESC
-      -o, --outFileNamePrefix OUT
+      -o OUT, --outFileNamePrefix OUT
                             the output file name
-      -m, --mode {bioRep,techRep, dropOut}
+      -m {bioRep,techRep,dropOut,stat}, --mode {bioRep,techRep,dropOut,stat}
                             calculation mode. Choose from {'bioRep',
-                            'techRep','dropOut'}.
-                            'bioRep': using all data to calculate mean CT.
+                            'techRep','dropOut'.'stat'}.
+                            'bioRep': using all data to calculate mean DeltaCT.
                             'techRep': only use first entry of replicates.
-                            'dropOut': if sd < 0.5, reject outlier and
-                            recalculate mean CT Default: bioRep.
+                            'dropOut': if sd < 0.5, reject outlier and recalculate mean CT.
+                            'stat': statistical testing for each group and target names.
+                            Default: 'dropOut'.
       --header HEAD         Row (0-indexed) to use for the column labels of the
                             parsed DataFrame
-      --tail TAIL           the tail Rows of your excel file you want to skip
+      --tail TAIL           the tail rows of your excel file you want to skip
                             (0-indexed)
       --version             show program's version number and exit
 
-
+```
 ## Usage
 
 ### Extract Data from ABI machine  Data output
@@ -76,7 +86,7 @@ Python2.7 or Python3+
 **e.g.**  
 
 ```bash
-    python qpcrRead.py -d test/h9_vii7_export.xls --header 35 --tail 5  -o test/output
+    python qpcrRead.py -d test/h9_vii7_export.xls -o test/test_interest_data.xls
 ```
 
 ### Calculate Delta_Ct, Delta_Delta_Ct, Fold_Changes
@@ -90,23 +100,35 @@ The following file formats are supported: **xls, xlsx, csv, txt**.
 
 ```bash
     python qpcrCalculate.py -d test/test_interest_data.xls \
-                            -i GAPDH  -e H9_NT_LSB_D16 \
+                            -i GAPDH \
+                            -e H9_NT_LSB_D16 \
+                            -m dropOut
                             -o test/20150625_NPC_Knockdown
 ```
 
 ### Perform Student's t-test from n independent experiments.
-Note: use `qpcrCalulate.py` outputs
+Note: use `qpcrCalulate.py` output resluts directly. or your own file
+
 
 The following file formats are supported: **xls, xlsx, csv, txt**.
 **e.g.**
 
+For 3 independent experiments (biological repicates), try:
+
 ```bash
-    python qpcrStat.py -d test/test_stat_input.xls \
-                            -i GAPDH \
+    python qpcrCalculate.py -d test/input1.xls,test/input2.xls,test/input3.xls \
                             -e H9_NT_LSB_D16 \
                             -m stat \
-                            -o test/20150625_NPC_Knockdown
+                            -o test/output
 ```
+For -d, you could combined each experiment (input1-3) into one single file.
+```bash
+    python qpcrCalculate.py -d test/input_combined.xls \
+                            -e H9_NT_LSB_D16 \
+                            -m stat \
+                            -o test/output
+```
+
 
 
 ## To Do List
