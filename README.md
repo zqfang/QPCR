@@ -70,7 +70,7 @@ Calculate Delta Ct, DDelta Ct, Fold Changes, P-values for QPCR results.
                             'bioRep': using all data to calculate mean DeltaCT.
                             'techRep': only use first entry of replicates.
                             'dropOut': if sd < 0.5, reject outlier and recalculate mean CT.
-                            'stat': statistical testing for each group and target names.
+                            'stat': statistical testing for each group vs experimental control.
                             Default: 'dropOut'.
       --header HEAD         Row (0-indexed) to use for the column labels of the
                             parsed DataFrame
@@ -108,7 +108,8 @@ The following file formats are supported: **xls, xlsx, csv, txt**.
 ```
 
 ### Perform Student's t-test from n independent experiments.
-Note: use `qpcrCalulate.py` output resluts directly. or your own file
+Note: use `qpcrCalulate.py -m {'bioRep','techRep','dropOut'} ` output results as 'stat' input.
+or your own file contained column: `Delta Ct`. See example file in `test` folder.
 
 
 The following file formats are supported: **xls, xlsx, csv, txt**.

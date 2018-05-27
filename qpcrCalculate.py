@@ -28,7 +28,9 @@ def parse_cli():
                              "'bioRep': using all data to calculate mean DeltaCT.." + \
                              "'techRep': only use first entry of replicates." + \
                              "'dropOut': if sd < 0.5, reject outlier and recalculate mean CT."+\
-                             "'stat': statistical testing for each group and target names. Default: dropOut.")
+                             "'stat': statistical testing for each group vs experimental control. Default: dropOut.")
+    parser.add_argument("--std", action="store", type=float, dest="std", default=0.5,
+                        help="Minimal standard deviation to filtering CT values. Only affects CT means. Default: 0.5")
     parser.add_argument("--header", action="store", type=int, dest="head", default=0,
                         help="Row (0-indexed) to use for the column labels of the parsed DataFrame")
     parser.add_argument("--tail", action="store", type=int, dest="tail", default=0,
@@ -83,6 +85,10 @@ def read_input(args):
 
 
 def parse_input(args):
+    """parse multi-file input"""
+    if args.std <=0:
+        print("standard deviation could not be negative!!!")
+        sys.exit(1)
 
     path = args.data.split(",")
     data =[]
@@ -99,21 +105,21 @@ def reject_outliers(data, m = 2.):
     return data[s<m]
 
 
-def min_mean(arr):
+def min_mean(arr, std=0.5):
     arr_std = np.nanstd(arr)
-    if arr_std < 0.5:
+    if arr_std < std:
         mmean = np.nanmean(arr)
     else:
         temp = reject_outliers(arr)
         mmean = temp.mean()
     return mmean
 
-def min_mean2(arr):
+def min_mean2(arr, std=0.5):
     na = np.isnan(arr)
     na_num,arr_len = na.sum(),len(arr)
     if na_num == arr_len: return np.NaN
     arr_std = np.nanstd(arr)
-    if arr_std < 0.5:
+    if arr_std < std:
         mmean = np.nanmean(arr)
     else:
         mmean = np.array(list(combinations(arr[~na], arr_len-na_num))).mean().min()
@@ -175,7 +181,7 @@ def run(args):
         # find and drop outliers automatically, the calculate CT mean...
         for idx, data in enumerate(args.groups):
             args.out = outname+str(idx)
-            data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean2)
+            data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean2, std=args.std)
             data2 = pd.DataFrame(data2)
             data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
             calc_fc(args, data2)
@@ -229,7 +235,8 @@ def calc_fc(args, df):
     final_report = pd.concat([df[['Ct Mean']], DelCt3[['Delta Ct']],
                               DDelCt4[['DDelta Ct']], foldChange0[['Fold Changes']]], axis=1, )
     final_report.to_csv(args.out + '.csv')
-    print('The first 8 rows in your Final results: ')
+    print("\n\n########################################")
+    print('The first 8 rows in your Final results:\n')
     print(final_report.head(8))
 
 
@@ -294,12 +301,15 @@ def calc_stats(args):
     final.to_excel(writer, 'Full')
     t_stat.to_excel(writer,'Stats')
     writer.save()
-    print('The first 8 rows in your Final results: ')
+    print("\n\n#######################################")
+    print('The first 8 rows in your Final results:\n')
     print(t_stat.head(8))
 
 
 if __name__ == "__main__":
     args = parse_cli()
+    print("###########################################")
+    print("Input parameters:")
     print("InputFile        =", args.data)
     print("SheetName        =", args.sheet)
     print("headerRow        =", args.head)
@@ -307,8 +317,9 @@ if __name__ == "__main__":
     print("ReferenceControl =", args.ic)
     print("ExperimentControl=", args.ec)
     print("outFileName      =", args.out)
+    print("\n###########################################")
 
     # run program
     run(parse_input(args))
-    print("Program ran successfully")
+    print("\nProgram ran successfully")
     print("Good Job! Cheers!!!")
