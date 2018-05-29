@@ -53,11 +53,13 @@ print("Input File Checking passed !")
 # Read data into pandas DataFrame Object
 if args.machine in ['viia7','q7']:
     if args.machine == 'q7': args.head = 44  
-    data = pd.read_excel(args.data, sheet_name=args.sheet, header= args.head, skip_footer=args.tail)
+    data = pd.read_excel(args.data, sheet_name=args.sheet, comment='#',
+                         header= args.head, skipfooter=args.tail)
     dat = data[col_viia]
 elif args.machine == '7900':
     args.head, args.tail = 10, 7
-    data = pd.read_table(args.data, header= args.head, skip_footer=args.tail)
+    data = pd.read_table(args.data, comment='#',
+                         header= args.head, skipfooter=args.tail)
     dat = data[col_7900]
 else:
     print("-m args error, please refine your args")

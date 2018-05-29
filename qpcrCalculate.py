@@ -1,3 +1,11 @@
+'''
+This script used for calculate delta Ct, delta delta Ct, fold changes and p-values.
+version: 0.1
+date: 2018.05.28
+author: Zhuoqing Fang
+email: fzq518@gmail.com
+'''
+
 from __future__ import print_function
 import argparse
 import sys
@@ -49,14 +57,14 @@ def read_input(args):
     # read data into a dataFrame
     suffix = args.path.split(".")[-1]
     if suffix in ['xls', 'xlsx']:
-        data = pd.read_excel(io=args.path, sheet_name=args.sheet,
-                             header=args.head, skip_footer=args.tail)
+        data = pd.read_excel(io=args.path, sheet_name=args.sheet, comment='#',
+                             header=args.head, skipfooter=args.tail)
     elif suffix == 'csv':
-        data = pd.read_csv(args.path, header=args.head, skip_footer=args.tail)
+        data = pd.read_csv(args.path, comment='#', header=args.head, skipfooter=args.tail)
     elif suffix == 'txt':
-        data = pd.read_table(args.path, header=args.head, skip_footer=args.tail)
+        data = pd.read_table(args.path, comment='#', header=args.head, skipfooter=args.tail)
     else:
-        print("Unsupported file format input. Please use xls,xlsx. csv, txt format!")
+        print("Unsupported file format input. Please use xls, xlsx. csv, txt format!")
         sys.exit(1)
 
     # rename column name
@@ -141,7 +149,7 @@ def stars(p):
 def ttest(arr1, arr2, axis=1):
     """arr1, arr2 could be two dimension. refer to scipy.stats.ttest_ind
        for pandas dataframe input, note the axis
-    
+
     """
     # z, pm = stats.mannwhitneyu(arr1, arr2)
     # pm = pm * 2 # two tailed
@@ -161,9 +169,10 @@ def run(args):
 
     # run mode
     outname = args.out
+    idxs = len(args.groups)
     if args.mode == 'bioRep':
         for idx, data in enumerate(args.groups):
-            args.out = outname+str(idx)
+            if idxs >1: args.out = outname+str(idx)
             data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].mean()
             data2 = pd.DataFrame(data2)
             data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
@@ -173,14 +182,14 @@ def run(args):
         # tech replicates need to drop outliers by hand
         # this means you already have a 'CT mean' column exists
         for idx, data in enumerate(args.groups):
-            args.out = outname+str(idx)
+            if idxs >1: args.out = outname+str(idx)
             data2 = data.drop_duplicates(['Sample Name', 'Target Name'])
             data2 = data2.set_index(['Sample Name', 'Target Name'])
             calc_fc(args, data2)
     elif args.mode == 'dropOut':
         # find and drop outliers automatically, the calculate CT mean...
         for idx, data in enumerate(args.groups):
-            args.out = outname+str(idx)
+            if idxs >1: args.out = outname+str(idx)
             data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean2, std=args.std)
             data2 = pd.DataFrame(data2)
             data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
