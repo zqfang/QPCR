@@ -86,6 +86,12 @@ def read_input(args):
                         | Ct SD |
                   """)
             sys.exit(1)
+    if args.ec not in data['Sample Name'].unique(): 
+        print("Experimental control Name: %s Not found in %s!"%(args.ec,args.path) )
+        sys.exit(1)
+    if args.ic not in data['Target Name'].unique(): 
+        print("intternal control Name:%s Not found in %s!"%(args.ic,args.path) )
+        sys.exit(1)
     # convert "undetermined to NA"
     data.iloc[:, 2:] = data.iloc[:, 2:].apply(pd.to_numeric, errors='coerce', axis=1)
 
@@ -130,7 +136,7 @@ def min_mean2(arr, std=0.5):
     if arr_std < std:
         mmean = np.nanmean(arr)
     else:
-        mmean = np.array(list(combinations(arr[~na], arr_len-na_num))).mean().min()
+        mmean = np.array(list(combinations(arr[~na], arr_len-na_num))).mean(axis=0).min()
     return mmean
 
 
@@ -158,6 +164,13 @@ def ttest(arr1, arr2, axis=1):
     s = [stars(pv) for pv in p]
     return t,p,s
 
+def reshape(df):
+
+    df['CTs'] = 'CT Rep' + df.groupby(['Sample Name', 'Target Name'], as_index=False).cumcount().astype(str)
+    df_pivot = df.pivot_table(index=['Sample Name','Target Name'],
+                                     columns='CTs',values='CT')
+    return df_pivot
+
 
 def run(args):
     """run program"""
@@ -166,13 +179,14 @@ def run(args):
         if args.ic is None:
             print('"-i", "--internalControl" is required')
             sys.exit(1)
-
+    
     # run mode
     outname = args.out
     idxs = len(args.groups)
     if args.mode == 'bioRep':
         for idx, data in enumerate(args.groups):
             if idxs >1: args.out = outname+str(idx)
+            args.ct = reshape(data)
             data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].mean()
             data2 = pd.DataFrame(data2)
             data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
@@ -183,6 +197,7 @@ def run(args):
         # this means you already have a 'CT mean' column exists
         for idx, data in enumerate(args.groups):
             if idxs >1: args.out = outname+str(idx)
+            args.ct = reshape(data)
             data2 = data.drop_duplicates(['Sample Name', 'Target Name'])
             data2 = data2.set_index(['Sample Name', 'Target Name'])
             calc_fc(args, data2)
@@ -190,6 +205,7 @@ def run(args):
         # find and drop outliers automatically, the calculate CT mean...
         for idx, data in enumerate(args.groups):
             if idxs >1: args.out = outname+str(idx)
+            args.ct = reshape(data)
             data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean2, std=args.std)
             data2 = pd.DataFrame(data2)
             data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
@@ -241,7 +257,7 @@ def calc_fc(args, df):
     foldChange0 = np.power(2, -DDelCt4)
     foldChange0.rename(columns={'DDelta Ct': 'Fold Changes'}, inplace=True)
     # reshape your final results
-    final_report = pd.concat([df[['Ct Mean']], DelCt3[['Delta Ct']],
+    final_report = pd.concat([args.ct, df[['Ct Mean']], DelCt3[['Delta Ct']],
                               DDelCt4[['DDelta Ct']], foldChange0[['Fold Changes']]], axis=1, )
     final_report.to_csv(args.out + '.csv')
     print("\n\n########################################")
@@ -304,10 +320,10 @@ def calc_stats(args):
         test1['Stars'] = s
         t_stat = t_stat.append(test1)
     # column names
-    t_stat = t_stat.reset_index().set_index(['Sample Name', 'Target Name'])
+    t_stat = t_stat.reset_index().set_index(['Sample Name', 'Target Name']).reset_index()
     # write output
     writer = pd.ExcelWriter('%s_stats.xls'%args.out)
-    final.to_excel(writer, 'Full')
+    final.reset_index().to_excel(writer, 'Full')
     t_stat.to_excel(writer,'Stats')
     writer.save()
     print("\n\n#######################################")
