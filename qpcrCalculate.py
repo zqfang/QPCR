@@ -87,11 +87,12 @@ def read_input(args):
                   """)
             sys.exit(1)
     if args.ec not in data['Sample Name'].unique(): 
-        print("Experimental control Name: %s Not found in %s!"%(args.ec,args.path) )
+        print("Experimental control Name: %s Not found in %s!"%(args.ec,args.path))
         sys.exit(1)
-    if args.ic not in data['Target Name'].unique(): 
-        print("intternal control Name:%s Not found in %s!"%(args.ic,args.path) )
-        sys.exit(1)
+    if args.mode != 'stat':    
+        if args.ic not in data['Target Name'].unique(): 
+            print("intternal control Name:%s Not found in %s!"%(args.ic,args.path) )
+            sys.exit(1)
     # convert "undetermined to NA"
     data.iloc[:, 2:] = data.iloc[:, 2:].apply(pd.to_numeric, errors='coerce', axis=1)
 
@@ -166,10 +167,13 @@ def ttest(arr1, arr2, axis=1):
 
 def reshape(df):
 
+
     df['CTs'] = 'CT Rep' + df.groupby(['Sample Name', 'Target Name'], as_index=False).cumcount().astype(str)
-    df_pivot = df.pivot_table(index=['Sample Name','Target Name'],
-                                     columns='CTs',values='CT')
-    return df_pivot
+    df_pivot = df.pivot_table(index=['Sample Name','Target Name'],columns='CTs',values='CT')
+    df_stat = df.groupby(['Sample Name', 'Target Name'])['CT'].agg(['mean','std'])
+    df_stat.rename(columns={'mean': 'Ct Mean (old)','std': 'Ct SD'}, inplace=True)
+    df2 = df_pivot.merge(df_stat, left_index=True, right_index=True)
+    return df2
 
 
 def run(args):
