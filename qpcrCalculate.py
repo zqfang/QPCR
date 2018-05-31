@@ -121,7 +121,7 @@ def reject_outliers(data, m = 2.):
 
 
 def min_mean(arr, std=0.5):
-    arr_std = np.nanstd(arr)
+    arr_std = np.nanstd(arr,ddof=1)
     if arr_std < std:
         mmean = np.nanmean(arr)
     else:
@@ -210,7 +210,7 @@ def run(args):
         for idx, data in enumerate(args.groups):
             if idxs >1: args.out = outname+str(idx)
             args.ct = reshape(data)
-            data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean2, std=args.std)
+            data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].apply(min_mean, std=args.std)
             data2 = pd.DataFrame(data2)
             data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
             calc_fc(args, data2)
