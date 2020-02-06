@@ -218,7 +218,7 @@ def run(args):
         args.df = pd.concat(args.groups)
         if 'Delta Ct' not in args.df:
             print("Column 'Delta Ct': Not Found!")
-            print("Step1: try to calculate Delta Ct in bioRep mode")
+            print("Try to calculate Delta Ct in bioRep mode")
             fc = []
             for idx, data in enumerate(args.groups):
                 if idxs >1: args.out = outname+str(idx)
@@ -227,6 +227,9 @@ def run(args):
                 data2 = pd.DataFrame(data2)
                 data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
                 fc.append(calc_fc(args, data2, return_df=True))
+            if len(fc) < 3:
+                print("Only %s experiments are found! Stop statistical testing"%len(fc))
+                return 
             args.df = pd.concat(args.groups)
             print("Step2: statistical testing")
         calc_stats(args)
