@@ -12,8 +12,6 @@ while getopts 'd:s:m:xe:i:o:h' optname
         sheetname=$OPTARG;;
       m)
         mode=$OPTARG;;
-      x)
-        stat="stat";;
       e)
         ec=$OPTARG;;
       i)
@@ -30,26 +28,24 @@ while getopts 'd:s:m:xe:i:o:h' optname
   done
 
 
-
-
 # # Read ABI machine output
 python qpcrRead.py -d ${data} -o ${out}_extracted
 
 #
 echo "Calculating Delta Ct, DDelta Ct, Fold Changes."
-python qpcrCalculate.py -d ${out}_extracted \
+python qpcrCalculate.py -d ${out}_extracted*.txt \
                         -i ${ic} \
                         -e ${ec} \
-                        -m ${mode}
-                        -o ${out}_delta
+                        -m ${mode} \
+                        -o ${out}_foldchange
 # extract delta ct
-if [ $stat == "stat" ]
+if [ "${stat}" == "stat" ]
 then
 echo "Statistical testing"
-python qpcrCalculate.py -d ${out}_delta.csv \
+python qpcrCalculate.py -d ${out}_foldchange.csv \
                         -i ${ic} \
                         -e ${ec} \
-                        -m stat
+                        -m stat \
                         -o ${out}_ttest
 else
     echo "Skip statistical testing"
