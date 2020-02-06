@@ -216,23 +216,11 @@ def run(args):
             calc_fc(args, data2)
     elif args.mode == 'stat':
         args.df = pd.concat(args.groups)
-        if 'Delta Ct' not in args.df:
-            print("Column 'Delta Ct': Not Found!")
-            print("Try to calculate Delta Ct in bioRep mode")
-            fc = []
-            for idx, data in enumerate(args.groups):
-                if idxs >1: args.out = outname+str(idx)
-                args.ct = reshape(data)
-                data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].mean()
-                data2 = pd.DataFrame(data2)
-                data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
-                fc.append(calc_fc(args, data2, return_df=True))
-            if len(fc) < 3:
-                print("Only %s experiments are found! Stop statistical testing"%len(fc))
-                return 
-            args.df = pd.concat(args.groups)
-            print("Step2: statistical testing")
-        calc_stats(args)
+        if 'Delta Ct' in args.df:
+            calc_stats(args)
+        else:
+            args.mode = 'bioRep'
+            run(args)
     else:
         print("No supported method for further calculation")
         sys.exit(1)
