@@ -31,11 +31,11 @@ def parse_cli():
     parser.add_argument("-o", "--outFileNamePrefix", action="store", default="foo", dest="out",
                         help="the output file name")
     parser.add_argument("-m", "--mode", action="store", dest="mode", type=str,
-                        choices=("bioRep", "techRep", "dropOut","stat"), default="stat",
+                        choices=("bioRep", "techRep", "dropOut","stat"), default="dropOut",
                         help="calculation mode. Choose from {'bioRep', 'techRep','dropOut'.'stat'}." + \
                              "'bioRep': using all data to calculate mean DeltaCT.." + \
                              "'techRep': only use first entry of replicates." + \
-                             "'dropOut': if sd < 0.5, reject outlier and recalculate mean CT."+\
+                             "'dropOut': if std < 0.5, reject outlier and recalculate mean CT."+\
                              "'stat': statistical testing for each group vs experimental control. Default: dropOut.")
     parser.add_argument("--std", action="store", type=float, dest="std", default=0.5,
                         help="Minimal standard deviation to filtering CT values. Only affects CT means. Default: 0.5")
@@ -216,16 +216,25 @@ def run(args):
             calc_fc(args, data2)
     elif args.mode == 'stat':
         args.df = pd.concat(args.groups)
-        if 'Delta Ct' in args.df:
-            calc_stats(args)
-        else:
-            args.mode = 'dropOut'
-            run(args)
+        if 'Delta Ct' not in args.df:
+            print("Column 'Delta Ct': Not Found!")
+            print("Step1: try to calculate Delta Ct in bioRep mode")
+            fc = []
+            for idx, data in enumerate(args.groups):
+                if idxs >1: args.out = outname+str(idx)
+                args.ct = reshape(data)
+                data2 = data.groupby(['Sample Name', 'Target Name'])['CT'].mean()
+                data2 = pd.DataFrame(data2)
+                data2.rename(columns={'CT': 'Ct Mean'}, inplace=True)
+                fc.append(calc_fc(args, data2, return_df=True))
+            args.df = pd.concat(args.groups)
+            print("Step2: statistical testing")
+        calc_stats(args)
     else:
         print("No supported method for further calculation")
         sys.exit(1)
 
-def calc_fc(args, df):
+def calc_fc(args, df, return_df=False):
     """calculate Delta Ct, Fold Changes for one experiment with tech replicates"""
     sample =  df.index.get_level_values(0).unique().tolist()
     print("Your Samples are: ")
@@ -265,11 +274,12 @@ def calc_fc(args, df):
                               DDelCt4[['DDelta Ct']], foldChange0[['Fold Changes']]], axis=1, )
     final_report.to_csv(args.out + '.csv')
     print("\n\n########################################")
-    print('The first 8 rows in your Final results:\n')
-    print(final_report.head(8))
+    print('The first 5 rows in your Final results:\n')
+    print(final_report.head(5))
+    if return_df: return final_report
 
 
-def calc_stats(args):
+def calc_stats(args, return_df=False):
     """calculate Delta Ct, Fold Changes for n independent experiments with biological replicates"""
 
     # ref_ctrl = args.ic
@@ -331,8 +341,9 @@ def calc_stats(args):
     t_stat.to_excel(writer,'Stats')
     writer.save()
     print("\n\n#######################################")
-    print('The first 8 rows in your Final results:\n')
-    print(t_stat.head(8))
+    print('The first 5 rows in your Final results:\n')
+    print(t_stat.head(5))
+    if return_df: return t_stat
 
 
 if __name__ == "__main__":
